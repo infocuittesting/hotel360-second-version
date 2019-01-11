@@ -44,13 +44,21 @@ def negotiated(request):
 
 
 def ratedetailss(request):
-    d = request.json
-    #print(d)
-    #print(d['rate_tier_id'])
-
     
-    e = { k : v for k,v in d.items() if k not in ('days','room_types','package')}
-    #print(e)
+    d = request.json
+    print(d)
+        
+    e = { k : v for k,v in d.items() if k not in ('days','room_types','package','start_date','end_date')}
+    print("e",e)
+
+    get_code = { k : v for k,v in d.items() if k in ('ratecode_id','start_date','end_date')}
+    print("get_code",get_code)
+
+    gensql('insert','revenue_management.rate_details',get_code)
+    rate_details_id = json.loads(gensql('select','revenue_management.rate_details','max(rate_details_id) as number1',get_code))
+    print(rate_details_id)
+    e['rate_details_id'] = int(rate_details_id[0]['number1'])
+    
     room_id = json.loads(dbget("select max(rooms_id) as number1 from revenue_management.rooms_selected"))
     #print("room_id",room_id[0]['number1'])    
     for i in d['room_types']:
@@ -69,13 +77,22 @@ def ratedetailss(request):
                values ('"+str(package_id[0]['number2']+1)+"','"+str(j)+"')")
        e['packages_id'] =  int(package_id[0]['number2']+1)
     print("3333",e)
-    gensql('insert','revenue_management.rate_days',d['days'])
-    #days_id = json.loads(gensql('select','revenue_management.rate_days','rate_days_id',d['days']))
-    days_id = json.loads(dbget("select max(rate_days_id) as number3 from revenue_management.rate_days"))
-    print("days",days_id[0]['number3'])
-    e['rate_days_id'] = int(days_id[0]['number3'])
-    print("4444",e)
-    gensql('insert','revenue_management.rate_details',e)
+
+    days = d['days']
+    day1 = [ k  for k,v in days.items() if v != 0 ]
+    #print(a,days,day1)
+    from_date = request.json['start_date']
+    to_date = request.json['end_date']
+    from_date = datetime.datetime.strptime(from_date,'%Y-%m-%d').date()
+    to_date = datetime.datetime.strptime(to_date,'%Y-%m-%d').date()
     
-    return(json.dumps({"Return": "Record Inserted Successfully","ReturnCode": "RIS","Status": "Success","StatusCode": "200"},indent=4))
+    while from_date <= to_date:
+          print(from_date,from_date.strftime("%A")[0:3].lower())
+          if from_date.strftime("%A")[0:3].lower() in day1:
+              e['rate_date'] = from_date
+              gensql('insert','revenue_management.rates_all',e)
+          from_date+=datetime.timedelta(days=1)    
+    
+    return(json.dumps({"Return": "Record Inserted Successfully",
+                       "ReturnCode": "RIS","Status": "Success","StatusCode": "200"},indent=4))
            

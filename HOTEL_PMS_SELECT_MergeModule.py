@@ -121,3 +121,20 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays(request):
         pass
     
     return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+
+
+def Hotel_PMS_Select_DepositDueDate(request):
+    d = request.json
+    sql = json.loads(dbget("select res_due_date from reservation.res_deposit \
+                           where res_id = '"+str(d['res_id'])+"'"))
+    print(sql)
+    businessdate = datetime.datetime.strptime(date[0]['roll_business_date'], '%Y-%m-%d').date()
+    for i in sql:
+        if i['res_due_date'] is not None:
+            dateform = datetime.datetime.strptime(i['res_due_date'], '%Y-%m-%d').date()
+            print(dateform)
+            if dateform == businessdate:
+                return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record Valid','ReturnCode':'RV'}, sort_keys=True, indent=4))
+        else:
+             pass
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))

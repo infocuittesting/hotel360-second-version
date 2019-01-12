@@ -8,7 +8,7 @@ def HOTEL_RES_POST_INSERT_UpdateDeposit(request):
     print(d['res_id'],type(d['res_id']))
     sql_value = gensql('insert','reservation.res_deposit',a)
     query_id = json.loads(dbget("select sum(res_deposit_amount) as deposit_amount,count(*) from reservation.res_deposit where res_id = '"+str(d['res_id'])+"'"))
-    print(query_id)
+    #print(query_id)
     getanother = json.loads(dbget("select count(*)  from reservation.guest_deposit where guest_deposit.res_id = '"+str(d['res_id'])+"'"))
     #print(getanother)
     if query_id[0]['count'] != 0:

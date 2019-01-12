@@ -3,7 +3,7 @@ from sqlwrapper import gensql,dbget,dbput
 import datetime
 
 def HOTEL_CAH_POST_INSERT_UPDATEGUESTBILLING(request):
-
+    to_amount = {}
     result = request.json
     #print(result)
     d = result['bills']
@@ -22,9 +22,12 @@ def HOTEL_CAH_POST_INSERT_UPDATEGUESTBILLING(request):
     folio = {}
     folio['res_id'],folio['total_posting'],folio['total_amount'],folio['folio_no'] = res_id,Total_posting,Total_amount,fo_count[0]['folio_no']+1    
     gensql('insert','cashiering.reservation_folio',folio)
- 
+    
     
     for i in range(len(d)):
+        total_revenue_count = json.loads(dbget("select count(*) from cashiering.billing_total_revenue \
+                                           where res_id = '"+str(res_id)+"'"))
+        print(total_revenue_count)
         e = { k : v for k,v in d[i].items() if k not in ('editFlag','Post_des')}
         #print(i)
         #print(d,type(d),len(d))
@@ -34,8 +37,25 @@ def HOTEL_CAH_POST_INSERT_UPDATEGUESTBILLING(request):
         e['folio_no'] = fo_count[0]['folio_no']+1
         #print(d)
         gensql('insert','cashiering.billing_post',e)
-
-   
+        print(total_revenue_count[0]['count'])
+        print(e['Post_window'],type(e['Post_window']))
+        if total_revenue_count[0]['count'] != 0:
+            if e['Post_window'] == '1'  :
+                revenue_count = dbput("update cashiering.billing_total_revenue set total_revenue = total_revenue +'"+str(e['Posting_amount'])+"' \
+                                      where res_id = '"+str(res_id)+"' and res_room = '"+str(res_room)+"'")
+                print(revenue_count)
+            else:
+                pass
+        else:
+            if e['Post_window'] == '1':
+                to_amount['res_id'] = res_id
+                to_amount['res_room'] = res_room
+                to_amount['total_revenue'] = e['Posting_amount']
+                revenue_repott = gensql('insert','cashiering.billing_total_revenue',to_amount)
+            
+                print(revenue_repott)
+            else:
+                pass
     #dbput("update reservation.res_reservation set res_guest_balance = res_guest_balance + "+str(int(Total_amount))+" \
     #       where res_id='"+res_id+"' and res_room='"+res_room+"' ")
     

@@ -11,6 +11,8 @@ def HOTEL_CAH_POST_SELECT_QUERYINHOUSERECORD(request):
     print(value2)
     sql_value = value1+value2
     print(sql_value)
+
+    
        
     return(json.dumps({'Status': 'Success', 'StatusCode': '200','ReturnValue':sql_value  ,'ReturnCode':'RRTS'},indent=4))
 

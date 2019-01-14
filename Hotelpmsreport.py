@@ -334,4 +334,10 @@ def Cashiergettotalamount(request):
         #print(room_name)
         return(json.dumps({"Return":"Record Retrieved Sucessfully","Return_Code":"RTS","Status": "Success","Status_Code": "200","Returnvalue":res},indent=2))
   
+def RoomHistory(request):
+    today = datetime.datetime.utcnow().date()
+    print(today)
+    sql_value = json.loads(dbget("select * from reservation.res_reservation where res_arrival < '"+str(today)+"' order by res_arrival"))
+    #print(sql_value)
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','ReturnValue':sql_value  ,'ReturnCode':'RRTS'},indent=4))
 

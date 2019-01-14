@@ -6,9 +6,9 @@ def HOTEL_AR_POST_INSERT_AccountSetup(request):
     d = request.json
     print(d)
     RES_Log_Date = datetime.datetime.utcnow().date()
-    print(RES_Log_Date)
+    #print(RES_Log_Date)
     count_pf_id = json.loads(dbget("select count(*) from account_receivable.account_setup where profile_id='"+d['profile_id']+"' "))
-    print(count_pf_id[0]['count'],type(count_pf_id[0]['count']))
+    #print(count_pf_id[0]['count'],type(count_pf_id[0]['count']))
     if count_pf_id[0]['count'] != 0:
        return(json.dumps({"Return": "Record Already Inserted","ReturnCode": "RAI",
                        "Status": "Success","StatusCode": "200"},indent=4))
@@ -20,12 +20,12 @@ def HOTEL_AR_POST_INSERT_AccountSetup(request):
     name=''
     for i in ac:
         name+=i[0]
-    print(name)
+    #print(name)
     ac_no = json.loads(dbget("select ac_no from account_receivable.account_number"))
     
     ac_no1 = str(ac_no[0]['ac_no']+1)
     account_number = name+ac_no1
-    print(account_number)
+    #print(account_number)
     dbput("update account_receivable.account_number set ac_no='"+str(ac_no[0]['ac_no']+1)+"' ")
     d['account_number'] = account_number
     d['created_on'] = RES_Log_Date

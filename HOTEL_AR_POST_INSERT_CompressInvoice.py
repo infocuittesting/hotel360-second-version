@@ -43,7 +43,7 @@ def HOTEL_AR_POST_DELETE_UnCompressInvoice(request):
     d = request.json
     z= d['invoice_no']
     
-    for i in z:
+    for i in d['invoice_no']:
   
         sql = dbput("update account_receivable.accout_inivoice set acc_invoice_satus = 'UnCompress' \
                      where account_number = '"+d['account_number']+"' and invoice_no = '"+str(i)+"'")

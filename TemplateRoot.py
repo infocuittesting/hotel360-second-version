@@ -432,6 +432,7 @@ from Hotelpmsreport import GetReservationNoshowreport
 from Hotelpmsreport import futurebooking
 from Hotelpmsreport import HistoryBooking
 from Hotelpmsreport import Cashiergettotalamount
+from Hotelpmsreport import RoomHistory
 
 #<----------------------------------MERGE MODULE-------------------------------.
 from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_Select_GetTodayRoomAvailabilityArrival
@@ -1565,6 +1566,9 @@ def futurebooking_all():
 def Cashiergettotalamount_all():
    return Cashiergettotalamount(request)
 
+@app.route("/RoomHistory",methods=['POST'])
+def RoomHistory_all():
+   return RoomHistory(request)
 #<------------------------account receviable----------------------------->
 #<--------------------Account Receivable------------------------------>
 @app.route("/HOTEL_AR_POST_INSERT_AccountSetup",methods=['POST'])

@@ -37,7 +37,7 @@ def HOTEL_AR_POST_SELECT_ApplyPaymentSelectiviely(request):
                                        where account_number = '"+str(d['account_no'])+"'"))
     setupamount = acc_set[0]['account_balance'] - d['posting_amount']
     d['posting_date'] = Posting_date
-    d['posting_status'] = "Apply"
+    d['posting_status'] = "Apply Payment Selectively"
     gensql('insert','account_receivable.invoice_payment',d)
     
     sql = dbput("update account_receivable.account_setup set account_balance = '"+str(setupamount)+"' \
@@ -106,7 +106,7 @@ def HOTEL_AR_POST_SELECT_ReversePayment(request):
     e = { k : v for k,v in d.items() if k != '' if k in ('account_no','invoice_no','posting_payment_id')}
     print(e)
     a['posting_date'] = Posting_date
-    a['posting_status'] = "Apply"
+    a['posting_status'] = "Reverse Payment"
     a['posting_amount']=-(d['posting_amount'])
     gensql('update','account_receivable.invoice_payment',a,e)
     sql = dbput("update account_receivable.account_setup set account_balance = '"+str(setupamount)+"' \

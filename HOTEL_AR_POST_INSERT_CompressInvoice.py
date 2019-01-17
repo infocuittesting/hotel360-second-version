@@ -23,7 +23,7 @@ def HOTEL_AR_POST_INSERT_CompressInvoice(request):
     s['room_class_id'] = d['room_class_id']
     s['invoice_amount'] = d['invoice_amount']
     s['open_amount'] = d['open_amount']
-    #d['acc_invoice_satus'] = "Compress"
+    s['acc_invoice_satus'] = "New Compress"
     gensql('insert','account_receivable.accout_inivoice',s)
     
     z= d['invoice_no']
@@ -64,8 +64,8 @@ def HOTEL_AR_POST_SELECT_YearViewAmount(request):
 
     for i in yearview:
         period = datetime.datetime.strptime(i['invoice_date'],'%Y-%m-%d').date()
-        print(period.strftime('%B,%y'))
-        period_view.append({'period':period.strftime('%B,%Y'),'Balance':i['open_amount']})
+        print(period.strftime('%b,%y'))
+        period_view.append({'period':period.strftime('%b,%Y'),'Balance':i['open_amount']})
     return(json.dumps({'Status': 'Success', 'StatusCode': '200',
                        'ReturnValue': period_view  ,'ReturnCode':'RRTS'},indent=4))
 

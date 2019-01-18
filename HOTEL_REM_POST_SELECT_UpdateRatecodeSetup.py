@@ -165,7 +165,7 @@ def HOTEL_REM_POST_SELECT_SelectRatesetupAll(request):
       cords['rate_details'] = rate_details        
     #print("--------------------------------------")
     #print("records   ",records,"len",len(records))       
-    return(json.dumps({"records":records,"return_code":RRS,"message":"Record Retrived Successfully"},indent=4))
+    return(json.dumps({"records":records,"return_code":"RRS","message":"Record Retrived Successfully"},indent=4))
 
     '''
     rec3 = json.loads(dbget("SELECT rate_details_id, one_adult_rate, two_adult_rate, three_adult_rate,\

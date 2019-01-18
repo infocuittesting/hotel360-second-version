@@ -28,16 +28,36 @@ def QueryHistoryReservation(request):
     return(json.dumps({'Status': 'Success', 'StatusCode': '200','ReturnValue':result  ,'ReturnCode':'RRTS'},indent=4))
 def HOTEL_RES_POST_SELECT_RateQuery(request):
      s = request.json
-     rate_code ,ratecode_rooms_id,ratecode_packages_id= [],[],[]
+     rate_code ,ratecode_rooms_id,ratecode_packages_id,result= [],[],[],[]
      #query = requests.post("https://hotel360.herokuapp.com/HOTEL_REM_POST_SELECT_SelectRatesetupAll")
      data = json.loads(HOTEL_REM_POST_SELECT_SelectRatesetupAll(request))
      #print(data)
      #print(type(data['Rate_header']))
-     rate_details = data['Rate_details']
      
-     value = data['Rate_header']
-     result = [d for d in value if d['begin_sell_date'] >= s['arrival_date'] and d['end_sell_date'] <= s['departure_date']]
+     
+     records = data['records']
+     new_records = []
+     #result = [d for d in value[0]['rate_details'] if d['start_date'] <= s['arrival_date'] and d['end_date'] >= s['departure_date']]
+     for record in records:
+             new_record = {}
+             new_record['rate_code'] = record['rate_code']
+             #new_records.append(new_record)
+             for detail in record['rate_details']:
+                 
+                if detail['start_date'] <= s['arrival_date'] or detail['end_date'] >= s['departure_date']:
+                    
+                    for rm in detail['rooms']:
+                       rm['rate'] = detail['advanced_details']['four_adult_rate']
+                    new_record['rates'] = detail['rooms']
+             new_records.append(new_record)       
+     print("new_records",new_records)        
+             
+             
+             #  ratecode_rooms_id.append(d)
+             #  print("&&&",ratecode_rooms_id)
+     #result = [d for d in value[d]['rate_details'] if d['start_date'] >= s['arrival_date'] and d['end_date'] <= s['departure_date']]
      #print(type(result))
+     '''
      for results in result:
          ratecode_rooms_id.append(results['rooms_id'])
          ratecode_packages_id.append(results['packages_id'])
@@ -96,5 +116,6 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
                          room['room_rate'] = rate['two_adult_amount']
                      elif s['adults'] == 1:
                          room['room_rate'] = rate['one_adult_amount']
+     '''
                  
-     return(json.dumps({"Return": result,"Status": "Success","StatusCode": "200"},indent=4))
+     return(json.dumps({"Return": new_records,"Status": "Success","StatusCode": "200"},indent=4))

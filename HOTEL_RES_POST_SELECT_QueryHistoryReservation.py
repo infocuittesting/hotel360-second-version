@@ -34,7 +34,9 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
      #print(data)
      #print(type(data['Rate_header']))
      
-     
+     list_roomtypes = json.loads(dbget("SELECT id, type, description \
+                                        FROM room_management.room_type"))
+     print(list_roomtypes)
      records = data['records']
      new_records = []
      #result = [d for d in value[0]['rate_details'] if d['start_date'] <= s['arrival_date'] and d['end_date'] >= s['departure_date']]
@@ -47,12 +49,28 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
                 if detail['start_date'] <= s['arrival_date'] or detail['end_date'] >= s['departure_date']:
                     
                     for rm in detail['rooms']:
-                       rm['rate'] = detail['advanced_details']['four_adult_rate']
+                       #print(rm['roomstype'],rm['roomid'])
+                       ratecode_packages_id.append(rm['roomstype'])
+                       if s['adults'] == 4:
+                        rm['rate'] = detail['advanced_details']['four_adult_rate']
+                       elif s['adults'] == 3:
+                        rm['rate'] = detail['advanced_details']['three_adult_rate']
+                       elif s['adults'] == 2:
+                        rm['rate'] = detail['advanced_details']['two_adult_rate']
+                       elif s['adults'] == 1:
+                        rm['rate'] = detail['advanced_details']['one_adult_rate']
                     new_record['rates'] = detail['rooms']
-             new_records.append(new_record)       
+             new_records.append(new_record)
+             
      print("new_records",new_records)        
-             
-             
+     print("roomytpe",set(ratecode_packages_id))
+     #final_value = sorted(new_records,key = lambda x: x['rates'] )
+     #for new_record in new_records:
+     #for l in list_roomtypes:
+             #for rm in  new_record['rates']:
+                
+                    #new_record['rates'].append({'rooms_selected_id':0,'rooms_id':0,'roomid':list_roomtype['id'],'roomstype':list_roomtype['type'],'rate':0})
+                 
              #  ratecode_rooms_id.append(d)
              #  print("&&&",ratecode_rooms_id)
      #result = [d for d in value[d]['rate_details'] if d['start_date'] >= s['arrival_date'] and d['end_date'] <= s['departure_date']]
@@ -118,4 +136,4 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
                          room['room_rate'] = rate['one_adult_amount']
      '''
                  
-     return(json.dumps({"Return": new_records,"Status": "Success","StatusCode": "200"},indent=4))
+     return(json.dumps({"Return": ,"Status": "Success","StatusCode": "200"},indent=4))

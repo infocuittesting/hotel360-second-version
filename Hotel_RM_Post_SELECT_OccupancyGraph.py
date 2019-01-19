@@ -61,7 +61,7 @@ def Hotel_RM_Post_SELECT_FacilityForecast(request):
        return(inhouse_count)
 
    while  date1 <= date2:
-        list2.append({'date':str(date1),'values':{'arrival_rooms':arrival_and_dep_rooms(date1,name='res_arrival'),
+        list2.append({'days':date1.strftime("%A"),'date':str(date1),'values':{'arrival_rooms':arrival_and_dep_rooms(date1,name='res_arrival'),
                                                   'depature_rooms':arrival_and_dep_rooms(date1,name='res_depature'),
                                                   'adult_inhouse':inhouse(date1,name='res_adults'),
                                                   'child_inhouse':inhouse(date1,name='res_child')}})

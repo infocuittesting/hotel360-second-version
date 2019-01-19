@@ -1566,7 +1566,7 @@ def futurebooking_all():
 def Cashiergettotalamount_all():
    return Cashiergettotalamount(request)
 
-@app.route("/RoomHistory",methods=['POST'])
+@app.route("/RoomHistory",methods=['POST','GET'])
 def RoomHistory_all():
    return RoomHistory(request)
 #<------------------------account receviable----------------------------->

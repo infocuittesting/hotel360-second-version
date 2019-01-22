@@ -26,7 +26,19 @@ def QueryHistoryReservation(request):
     result = json.loads(result)
     print(result)
     return(json.dumps({'Status': 'Success', 'StatusCode': '200','ReturnValue':result  ,'ReturnCode':'RRTS'},indent=4))
+
+def get_rate(s):
+    if s == 4:
+        return('four_adult_rate')
+    elif s == 3:
+        return('three_adult_rate')
+    elif s == 2:
+        return('two_adult_rate')
+    elif s == 1:
+        return('one_adult_rate')
+        
 def HOTEL_RES_POST_SELECT_RateQuery(request):
+    
      s = request.json
      rate_code ,ratecode_rooms_id,ratecode_packages_id,result= [],[],[],[]
      #query = requests.post("https://hotel360.herokuapp.com/HOTEL_REM_POST_SELECT_SelectRatesetupAll")
@@ -34,9 +46,9 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
      #print(data)
      #print(type(data['Rate_header']))
      
-     list_roomtypes = json.loads(dbget("SELECT id, type, description \
-                                        FROM room_management.room_type"))
-     print(list_roomtypes)
+     list_roomtypes = [ r['r_type'] for r in json.loads(dbget("SELECT type as r_type \
+                                        FROM room_management.room_type"))]
+     print("list_roomtypes",list_roomtypes)
      records = data['records']
      new_records = []
      #result = [d for d in value[0]['rate_details'] if d['start_date'] <= s['arrival_date'] and d['end_date'] >= s['departure_date']]
@@ -47,7 +59,7 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
              for detail in record['rate_details']:
                  
                 if detail['start_date'] <= s['arrival_date'] or detail['end_date'] >= s['departure_date']:
-                    
+                    '''
                     for rm in detail['rooms']:
                        #print(rm['roomstype'],rm['roomid'])
                        ratecode_packages_id.append(rm['roomstype'])
@@ -59,11 +71,23 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
                         rm['rate'] = detail['advanced_details']['two_adult_rate']
                        elif s['adults'] == 1:
                         rm['rate'] = detail['advanced_details']['one_adult_rate']
-                    new_record['rates'] = detail['rooms']
+                    '''
+                    new_record['rates'] = [dict(rm, rate=detail['advanced_details'][get_rate(s['adults'])]) for rm in detail['rooms']]
+
+                    new_rooms = [] 
+                    for r_type in new_record['rates']:
+                            new_rooms.append(r_type['roomstype'])
+                            
+                    for list1 in list_roomtypes:
+                        if list1 in new_rooms:
+                            pass
+                        else:
+                            new_record['rates'].append({'roomstype':list1,'rate':0})
+                          
              new_records.append(new_record)
              
      print("new_records",new_records)        
-     print("roomytpe",set(ratecode_packages_id))
+     #print("roomytpe",set(ratecode_packages_id))
      #final_value = sorted(new_records,key = lambda x: x['rates'] )
      #for new_record in new_records:
      #for l in list_roomtypes:
@@ -136,4 +160,4 @@ def HOTEL_RES_POST_SELECT_RateQuery(request):
                          room['room_rate'] = rate['one_adult_amount']
      '''
                  
-     return(json.dumps({"Return": ,"Status": "Success","StatusCode": "200"},indent=4))
+     return(json.dumps({"Return": new_records,"Status": "Success","StatusCode": "200"},indent=4))

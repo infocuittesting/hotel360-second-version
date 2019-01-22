@@ -14,7 +14,7 @@ def HOTEL_RES_POST_INSERT_UpdateDeposit(request):
     if query_id[0]['count'] != 0:
    
         if getanother[0]['count'] !=0:
-            sql = dbput("update reservation.guest_deposit set total_amount = '"+str(query_id[0]['deposit_amount'])+"'\
+            sql = dbput("update reservation.guest_deposit set total_amount =  '"+str(query_id[0]['deposit_amount'])+"'\
                         where res_id = '"+d['res_id']+"'")
             print(sql)
         else:

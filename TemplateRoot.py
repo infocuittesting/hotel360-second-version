@@ -942,7 +942,7 @@ def deleteRoomCondition():
 @app.route("/hotel_rm_post_update_updateroomdiscrepancies",methods=['POST'])
 def updateroomdiscrepancies():
    return hotel_rm_post_update_updateroomdiscrepancies(request)
-@app.route('/Hotel_Rm_Post_Select_QueryRoomDiscrepancies',methods=['POST'])
+@app.route('/Hotel_Rm_Post_Select_QueryRoomDiscrepancies',methods=['POST','GET'])
 def QueryRoomDiscrepancies ():
    return hotel_rm_post_select_queryroomdiscrepancies(request)
 @app.route('/Hotel_Rm_Post_Insert_UpdateGuestServiceStatus',methods=['POST'])

@@ -3,7 +3,7 @@ from sqlwrapper import gensql,dbget
 import datetime
 
 def HOTEL_BBL_POST_SELECT_EditBusinessBlockSearch(request):
-    packages_details = []
+    packages_details,inventory_details = [],[]
     d = request.json
     block_id = d.get("block_id")
     s = json.loads(dbget("select   pf_company_profile.pf_account,block_room.block_room_id,block_room.res_type_id,block_room.cutoff_date,block_room.cutoff_days, \
@@ -67,8 +67,18 @@ def HOTEL_BBL_POST_SELECT_EditBusinessBlockSearch(request):
         packages_details.append(pac_details[0])
       else:
           pass
+    inventorys = json.loads(dbget("select item_inventory_id \
+	                         from business_block.item_inventory \
+                                where block_id='"+block_id+"'"))
+    for inventory in inventorys:
+        ite_inen = json.loads(dbget("SELECT item_inventory_id, item_name, item_total, item_available, sell_separate \
+                                        FROM packages.item_inventory where item_inventory_id = '"+str(inventory)+"'"))
+        if len(ite_inen) != 0:
+            inventory_details.append(ite_inen[0])
+        else:
+            pass
     pftype = json.loads(dbget("select pf_type,pf_account from profile.pf_company_profile where pf_id = '"+profile_id+"'"))
     
     #print(s)
-    return(json.dumps({'Status': 'Success', 'StatusCode': '200','packages':packages_details,'ReturnValue':s,'profiletype':pftype[0]['pf_type'],'accountname':pftype[0]['pf_account'],'ReturnCode':'RRTS'},indent=4))
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','inventory':inventory_details,'packages':packages_details,'ReturnValue':s,'profiletype':pftype[0]['pf_type'],'accountname':pftype[0]['pf_account'],'ReturnCode':'RRTS'},indent=4))
    

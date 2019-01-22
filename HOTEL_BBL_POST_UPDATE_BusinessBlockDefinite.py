@@ -36,6 +36,26 @@ def HOTEL_BBL_POST_UPDATE_BusinessBlockDefinite(request):
        pass
     #<---------------------------rooms tab-------------------------->   
     y = d['Rooms']
+    pack,inventory = {},{}
+    if y['packages'] == "":
+        pass
+    else:
+        print("packages update")
+        sql = dbput("delete from business_block.block_packages where block_id = '"+str(y['block_id'])+"'")
+        for val in y['packages']: 
+            pack['block_id'] = y['block_id']
+            pack['packages_id'] = val
+            gensql('insert','business_block.block_packages',pack)
+    if y['inventory_control_id'] == "":
+        pass
+    else:
+        print("inventory_control_id update")
+        sql = dbput("delete from business_block.item_inventory where block_id = '"+str(y['block_id'])+"'")
+        for vals in y['inventory_control_id']: 
+            inventory['block_id'] = y['block_id']
+            inventory['item_inventory_id'] = vals
+            gensql('insert','business_block.item_inventory',inventory)
+    
     block_id = y.get("block_id")
     #y = { k : v for k,v in r.items() if v != '' }
     #print("jiok",y)
@@ -43,10 +63,10 @@ def HOTEL_BBL_POST_UPDATE_BusinessBlockDefinite(request):
     #print(sqlcount)
     #b['block_id'] = block_id
     #print("values",y)
-    b = { k : v for k,v in y.items() if v != '' if k not in ('block_id')}
+    b = { k : v for k,v in y.items() if v != '' if k not in ('block_id','packages')}
     #print(b)
     #c['block_id'] = block_id
-    c = { k : v for k,v in y.items() if k != '' if k in ('block_id')}
+    c = { k : v for k,v in y.items() if k != '' if k in ('block_id','packages')}
     #print(c)
     
     #print("Rooms",b,type(b),len(b))  

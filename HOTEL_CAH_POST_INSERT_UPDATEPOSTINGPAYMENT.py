@@ -55,8 +55,8 @@ def HOTEL_CAH_POST_INSERT_UPDATEPOSTINGPAYMENTCHECKOUT(request):
     s['Posting_description'] = "Payment posted successfully"
     gensql('insert','cashiering.posting_history_log',s)
     gensql('insert','cashiering.posting_original_history_log',s)
-    dbput("update reservation.guest_deposit set total_amount = total_amount+'"+str(d['Postig_amount'])+"'\
-                        where res_id = '"+d['res_id']+"'")
+    #dbput("update reservation.guest_deposit set total_amount = total_amount+'"+str(d['Postig_amount'])+"'\
+     #                   where res_id = '"+d['res_id']+"'")
     balance = json.loads(dbget("select res_guest_balance from reservation.res_reservation \
                                 where res_room="+d.get("res_room")+" and res_id="+d.get("res_id")+" "))
     print("balance",balance[0]['res_guest_balance'],type(balance[0]['res_guest_balance']))

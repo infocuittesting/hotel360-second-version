@@ -2,6 +2,63 @@ from sqlwrapper import gensql, dbget,dbput
 import json
 import datetime
 from collections import Counter
+def get_rate(s):
+   if s == 4:
+       return('four_adult_rate')
+   elif s == 3:
+       return('three_adult_rate')
+   elif s == 2:
+       return('two_adult_rate')
+   elif s == 1:
+       return('one_adult_rate')
+def HOTEL_REM_POST_SELECT_SelectRateForReservation(r_date, r_code, r_room, r_adult):
+   print("inputs: ", r_date, r_code, r_room, r_adult)
+
+   rate1 = json.loads(dbget("SELECT rates_all.rates_id, revenue_management.ratecode.*, \
+                             rates_all.rate_details_id, season_code.*, rates_all.rate_date, \
+                             rates_all.one_adult_rate, rates_all.two_adult_rate, rates_all.three_adult_rate,\
+                             rates_all.four_adult_rate, rates_all.one_child_rate,rates_all.two_child_rate,\
+                             rates_all.extra_child_rate, rates_all.rooms_id, rates_all.packages_id,\
+                             rate_tier.* from revenue_management.rates_all join \
+                             revenue_management.season_code on \
+                             rates_all.season_code_id = season_code.season_code_id join \
+                             revenue_management.rate_tier on \
+                             rates_all.rate_tier_id = rate_tier.rate_tier_id join \
+                  revenue_management.ratecode on rates_all.ratecode_id = ratecode.ratecode_id \
+                             where rate_date='"+r_date+"' and rate_code='"+r_code+"' "))
+                             #where rate_date='"+r_date+"' "))
+   print("rate1", rate1, len(rate1))
+   if len(rate1) == 1:
+       print("rate1[0][get_rate(r_adult)]", rate1[0][get_rate(r_adult)])
+       return(rate1[0][get_rate(r_adult)])
+
+   rooms = [rate['rooms_id'] for rate in rate1]
+   print(rooms)
+   r_id = ''
+   for room in rooms:
+       if len(r_id) == 0:
+           r_id+= "'"+str(room)+"'"
+       else:
+           r_id+= ","+"'"+str(room)+"'"
+
+   print(r_id)
+   rate2 = json.loads(dbget("select rooms_selected.*,room_type.type from revenue_management.rooms_selected \
+                             join room_management.room_type\
+                          on rooms_selected.room_type_id = room_type.id \
+                          where rooms_id in ("+r_id+")"))
+
+   print("rate2",rate2)
+
+   for rates in rate2:
+
+       if rates['type'] == r_room:
+           print("type", rates['type'])
+           ro_id = rates['rooms_id']
+           break
+
+   r_rate = [r[get_rate(r_adult)]  for r in rate1 if r['rooms_id']== ro_id]
+   print("r_rate", r_rate[0])
+   return(r_rate[0])
 def Hotel_END_OF_Day_POST_countrycheck(request):
    today_date = datetime.datetime.utcnow().date()
    print(today_date)
@@ -35,28 +92,59 @@ def Hotel_END_OF_Day_POST_Roll_Business_date(request):
 
 def Hotel_END_OF_Day_POST_Posting_Rooms_charges(request):
    print("Hello world")
-   run_charges,d = [],{}
+   run_charges,d,fixed_rate_id = [],{},[]
    date = json.loads(dbget("select roll_business_date from endofday.business_date"))
    print(date)
-
-   #****************************************Posting Rooms and tax charges **************************************************
-   sql_value = json.loads(dbget("select * from reservation.res_reservation \
+   #****************************************Posting fixed rate****************************************************
+   sql_value = json.loads(dbget("select res_arrival,res_depature,res_rate,res_id,fixed_rate,	(select count(*) from reservation.res_fixed_rate where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"') from reservation.res_fixed_rate \
                                  where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"'"))
-   for i in sql_value:
-      d['res_room'] = i['res_room']
-      d['res_id'] = i['res_id']
-      d['posting_amount'] = i['res_rate']
-      d['posting_date'] = date[0]['roll_business_date']
-      d['post_code_id'] = '5020'
-      d['post_window'] = '1'
-      d['posting_supplement'] = 'Night Audit Posting'
-      d['posting_reference'] = 'Night Audit Posting posting room chrages'
-      d['posting_quantity'] = '1'
-      d['emp_id'] = 1
-      gensql('insert','cashiering.billing_post',d)
-      run_charges.append({'room':i['res_room'],
-                          'name':i['pf_firstname'],
-                          'posting':'posting room and tax'})
+   print(sql_value)
+   if len(sql_value) >0:
+      for i in sql_value:
+         fixed_rate_id.append(i['res_id'])
+         psql = json.loads(dbget("select res_room,pf_firstname from reservation.res_reservation \
+                                  where res_id = '"+str(i['res_id'])+"'"))
+         d['res_room'] = psql[0]['res_room']
+         d['res_id'] = i['res_id']
+         d['posting_amount'] = i['res_rate']
+         d['posting_date'] = date[0]['roll_business_date']
+         d['post_code_id'] = '5020'
+         d['post_window'] = '1'
+         d['posting_supplement'] = 'Fixed rate Posting'
+         d['posting_reference'] = 'Fixed rate Posting room chrages'
+         d['posting_quantity'] = '1'
+         d['emp_id'] = 1
+         gensql('insert','cashiering.billing_post',d)
+         run_charges.append({'room':psql[0]['res_room'],
+                             'name':psql[0]['pf_firstname'],
+                             'posting':'posting room and tax'})
+      print(fixed_rate_id)
+   else:
+      print("posting room charges")
+      if len(fixed_rate_id) > 0:
+   #****************************************Posting Rooms and tax charges **************************************************
+         sql_value = json.loads(dbget("select * from reservation.res_reservation \
+                                       where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"' \
+                                       res_id not in ("+set(fixed_rate_id)+")"))
+      else:
+         sql_value = json.loads(dbget("select * from reservation.res_reservation \
+                                       where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"' "))
+      for i in sql_value:
+         data = HOTEL_REM_POST_SELECT_SelectRateForReservation(date[0]['roll_business_date'],i['res_rate_code'],i['res_room_type'],i['res_adults'])
+         d['res_room'] = i['res_room']
+         d['res_id'] = i['res_id']
+         d['posting_amount'] = data
+         d['posting_date'] = date[0]['roll_business_date']
+         d['post_code_id'] = '5020'
+         d['post_window'] = '1'
+         d['posting_supplement'] = 'Room charges Posting'
+         d['posting_reference'] = 'posting room chrages'
+         d['posting_quantity'] = '1'
+         d['emp_id'] = 1
+         gensql('insert','cashiering.billing_post',d)
+         run_charges.append({'room':i['res_room'],
+                             'name':i['pf_firstname'],
+                             'posting':'posting room and tax'})
    #****************************************Fixed Charges ********************************************************************
 
    fixed_charge = json.loads(dbget("select res_reservation.res_room, \

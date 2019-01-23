@@ -29,6 +29,7 @@ def HOTEL_REM_POST_SELECT_SelectRateForReservation(r_date, r_code, r_room, r_adu
                              #where rate_date='"+r_date+"' "))
    print("rate1", rate1, len(rate1))
    if len(rate1) == 1:
+       print("adult", r_adult)
        print("rate1[0][get_rate(r_adult)]", rate1[0][get_rate(r_adult)])
        return(rate1[0][get_rate(r_adult)])
 
@@ -99,37 +100,46 @@ def Hotel_END_OF_Day_POST_Posting_Rooms_charges(request):
    sql_value = json.loads(dbget("select res_arrival,res_depature,res_rate,res_id,fixed_rate,	(select count(*) from reservation.res_fixed_rate where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"') from reservation.res_fixed_rate \
                                  where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"'"))
    print(sql_value)
+   fixed_rate_id = ''
+   status = ['no show','cancel']
    if len(sql_value) >0:
       for i in sql_value:
-         fixed_rate_id.append(i['res_id'])
-         psql = json.loads(dbget("select res_room,pf_firstname from reservation.res_reservation \
+         if len(fixed_rate_id) == 0:
+            fixed_rate_id+="'"+str(i['res_id'])+"'"
+         else:
+            fixed_rate_id+=","+"'"+str(i['res_id'])+"'"
+            
+         psql = json.loads(dbget("select res_room,pf_firstname,res_guest_status from reservation.res_reservation \
                                   where res_id = '"+str(i['res_id'])+"'"))
-         d['res_room'] = psql[0]['res_room']
-         d['res_id'] = i['res_id']
-         d['posting_amount'] = i['res_rate']
-         d['posting_date'] = date[0]['roll_business_date']
-         d['post_code_id'] = '5020'
-         d['post_window'] = '1'
-         d['posting_supplement'] = 'Fixed rate Posting'
-         d['posting_reference'] = 'Fixed rate Posting room chrages'
-         d['posting_quantity'] = '1'
-         d['emp_id'] = 1
-         gensql('insert','cashiering.billing_post',d)
-         run_charges.append({'room':psql[0]['res_room'],
-                             'name':psql[0]['pf_firstname'],
-                             'posting':'posting room and tax'})
-      print(fixed_rate_id)
-   else:
-      print("posting room charges")
+         for s in psql:
+           if s['res_guest_status'] not in status:
+            d['res_room'] = s['res_room']
+            d['res_id'] = i['res_id']
+            d['posting_amount'] = i['res_rate']
+            d['posting_date'] = date[0]['roll_business_date']
+            d['post_code_id'] = '5020'
+            d['post_window'] = '1'
+            d['posting_supplement'] = 'Fixed rate Posting'
+            d['posting_reference'] = 'Fixed rate Posting room chrages'
+            d['posting_quantity'] = '1'
+            d['emp_id'] = 1
+            gensql('insert','cashiering.billing_post',d)
+            run_charges.append({'room':psql[0]['res_room'],
+                                'name':psql[0]['pf_firstname'],
+                                'posting':'posting room and tax'})
+      print(fixed_rate_id,type(fixed_rate_id))
+   
       if len(fixed_rate_id) > 0:
+         
    #****************************************Posting Rooms and tax charges **************************************************
          sql_value = json.loads(dbget("select * from reservation.res_reservation \
                                        where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"' \
-                                       res_id not in ("+set(fixed_rate_id)+")"))
+                                       and res_id not in ("+fixed_rate_id+") and res_guest_status not in ('no show','cancel')"))
       else:
          sql_value = json.loads(dbget("select * from reservation.res_reservation \
-                                       where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"' "))
-      for i in sql_value:
+                                       where res_arrival <= '"+str(date[0]['roll_business_date'])+"' and res_depature >='"+str(date[0]['roll_business_date'])+"' \
+                                       and res_guest_status not in ('no show','cancel')"))
+   for i in sql_value:
          data = HOTEL_REM_POST_SELECT_SelectRateForReservation(date[0]['roll_business_date'],i['res_rate_code'],i['res_room_type'],i['res_adults'])
          d['res_room'] = i['res_room']
          d['res_id'] = i['res_id']

@@ -42,6 +42,7 @@ def HOTEL_BBL_POST_INSERT_GroupReservation(request):
         update = dbput("update profile.profile_id set profile_id = '"+str(select[0]['profile_id']+1)+"'")
         select_data = json.loads(dbget("select \
                                        reservation.market.marketgroup_description,\
+                                       business_block_definite.pf_id as companyaccount, \
                           reservation.res_source.sourcedescription,\
                           reservation.origin.origindescription \
     			  from business_block.business_block_definite \
@@ -75,6 +76,7 @@ def HOTEL_BBL_POST_INSERT_GroupReservation(request):
         w['res_origin']=select_data[0]['origindescription']
         w['res_res_type']=rate_code_detail[0]['restype_description']
         w['res_rate_code']=rate_code_detail[0]['ratecode']
+        w['res_block'] = select_data[0]['companyaccount']
         data = HOTEL_REM_POST_SELECT_SelectRateForReservation(w['res_arrival'],w['res_rate_code'],w['res_room_type'],int(w['res_adults']))
          
         w['res_rate']=data

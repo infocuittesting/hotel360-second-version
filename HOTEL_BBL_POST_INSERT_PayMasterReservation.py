@@ -28,6 +28,7 @@ def HOTEL_BBL_POST_INSERT_PayMasterReservation(request):
     x['res_nights'] = sql[0]['nights']
     x['pf_id'] = sql[0]['pf_id']
     x['res_block_code'] = block_id
+    x['res_block']=sql[0]['pf_id']
     x['res_guest_status'] = "Definite Block"
     x['res_room_type'] = "PM"
     x['res_number_of_rooms'] = str(1)

@@ -126,7 +126,7 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays(request):
 def Hotel_PMS_Select_DepositDueDate(request):
     d = request.json
     sql = json.loads(dbget("select res_due_date from reservation.res_deposit \
-                           where res_id = '"+str(d['res_id'])+"'"))
+                           where res_id = '"+str(d['res_id'])+"' and res_block is null or res_block = '' "))
     print(sql)
     businessdate = datetime.datetime.strptime(date[0]['roll_business_date'], '%Y-%m-%d').date()
     for i in sql:

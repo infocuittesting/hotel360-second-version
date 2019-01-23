@@ -25,8 +25,8 @@ def HOTEL_RES_POST_UPDATE_RoomMove(request):
                  rm_reservation_status = '"+res_status+"',rm_room_status = '"+str(d['old_room_status'])+"',\
                  rm_fo_person = '0' where rm_room = '"+str(d['Old_Room'])+"'")
     print(psql)
-    updatebill = dbput("update cashiering.billing_post set res_room = '"+str(d['Res_room'])+"' \
-                              where res_id = '"+str(d['Res_id'])+"' and res_room = '"+str(d['Old_Room'])+"'")
+   # updatebill = dbput("update cashiering.billing_post set res_room = '"+str(d['Res_room'])+"' \
+                           #   where res_id = '"+str(d['Res_id'])+"' and res_room = '"+str(d['Old_Room'])+"'")
     print("updatebill",updatebill)
     if len(sql_value) != 0:
           data = '0'

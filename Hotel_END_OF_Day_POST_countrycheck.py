@@ -109,24 +109,40 @@ def Hotel_END_OF_Day_POST_Posting_Rooms_charges(request):
          else:
             fixed_rate_id+=","+"'"+str(i['res_id'])+"'"
             
-         psql = json.loads(dbget("select res_room,pf_firstname,res_guest_status from reservation.res_reservation \
+         psql = json.loads(dbget("select res_block,res_room,pf_firstname,res_guest_status from reservation.res_reservation \
                                   where res_id = '"+str(i['res_id'])+"'"))
          for s in psql:
            if s['res_guest_status'] not in status:
-            d['res_room'] = s['res_room']
-            d['res_id'] = i['res_id']
-            d['posting_amount'] = i['res_rate']
-            d['posting_date'] = date[0]['roll_business_date']
-            d['post_code_id'] = '5020'
-            d['post_window'] = '1'
-            d['posting_supplement'] = 'Fixed rate Posting'
-            d['posting_reference'] = 'Fixed rate Posting room chrages'
-            d['posting_quantity'] = '1'
-            d['emp_id'] = 1
-            gensql('insert','cashiering.billing_post',d)
-            run_charges.append({'room':psql[0]['res_room'],
-                                'name':psql[0]['pf_firstname'],
-                                'posting':'posting room and tax'})
+               if s['res_block'] is None:
+                  d['res_room'] = s['res_room']
+                  d['res_id'] = i['res_id']
+                  d['posting_amount'] = i['res_rate']
+                  d['posting_date'] = date[0]['roll_business_date']
+                  d['post_code_id'] = '5020'
+                  d['post_window'] = '1'
+                  d['posting_supplement'] = 'Fixed rate Posting'
+                  d['posting_reference'] = 'Fixed rate Posting room chrages'
+                  d['posting_quantity'] = '1'
+                  d['emp_id'] = 1
+                  gensql('insert','cashiering.billing_post',d)
+                  run_charges.append({'room':s['res_room'],
+                                      'name':s['pf_firstname'],
+                                      'posting':'posting room and tax'})
+               else:
+                  d['res_room'] = s['res_room']
+                  d['res_id'] = i['res_id']
+                  d['posting_amount'] = i['res_rate']
+                  d['posting_date'] = date[0]['roll_business_date']
+                  d['post_code_id'] = '5020'
+                  d['post_window'] = '2'
+                  d['posting_supplement'] = 'Fixed rate Posting'
+                  d['posting_reference'] = 'Fixed rate Posting room chrages'
+                  d['posting_quantity'] = '1'
+                  d['emp_id'] = 1
+                  gensql('insert','cashiering.billing_post',d)
+                  run_charges.append({'room':s['res_room'],
+                                         'name':s['pf_firstname'],
+                                         'posting':'posting room and tax'})
       print(fixed_rate_id,type(fixed_rate_id))
    
       if len(fixed_rate_id) > 0:
@@ -141,20 +157,36 @@ def Hotel_END_OF_Day_POST_Posting_Rooms_charges(request):
                                        and res_guest_status not in ('no show','cancel')"))
    for i in sql_value:
          data = HOTEL_REM_POST_SELECT_SelectRateForReservation(date[0]['roll_business_date'],i['res_rate_code'],i['res_room_type'],i['res_adults'])
-         d['res_room'] = i['res_room']
-         d['res_id'] = i['res_id']
-         d['posting_amount'] = data
-         d['posting_date'] = date[0]['roll_business_date']
-         d['post_code_id'] = '5020'
-         d['post_window'] = '1'
-         d['posting_supplement'] = 'Room charges Posting'
-         d['posting_reference'] = 'posting room chrages'
-         d['posting_quantity'] = '1'
-         d['emp_id'] = 1
-         gensql('insert','cashiering.billing_post',d)
-         run_charges.append({'room':i['res_room'],
-                             'name':i['pf_firstname'],
-                             'posting':'posting room and tax'})
+         if i['res_block'] is None:       
+            d['res_room'] = i['res_room']
+            d['res_id'] = i['res_id']
+            d['posting_amount'] = data
+            d['posting_date'] = date[0]['roll_business_date']
+            d['post_code_id'] = '5020'
+            d['post_window'] = '1'
+            d['posting_supplement'] = 'Room charges Posting'
+            d['posting_reference'] = 'posting room chrages'
+            d['posting_quantity'] = '1'
+            d['emp_id'] = 1
+            gensql('insert','cashiering.billing_post',d)
+            run_charges.append({'room':i['res_room'],
+                                'name':i['pf_firstname'],
+                                'posting':'posting room and tax'})
+         else:
+            d['res_room'] = i['res_room']
+            d['res_id'] = i['res_id']
+            d['posting_amount'] = data
+            d['posting_date'] = date[0]['roll_business_date']
+            d['post_code_id'] = '5020'
+            d['post_window'] = '2'
+            d['posting_supplement'] = 'Room charges Posting'
+            d['posting_reference'] = 'posting room chrages'
+            d['posting_quantity'] = '1'
+            d['emp_id'] = 1
+            gensql('insert','cashiering.billing_post',d)
+            run_charges.append({'room':i['res_room'],
+                                   'name':i['pf_firstname'],
+                                   'posting':'posting room and tax'})
    #****************************************Fixed Charges ********************************************************************
 
    fixed_charge = json.loads(dbget("select res_reservation.res_room, \

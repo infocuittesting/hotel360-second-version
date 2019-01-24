@@ -19,6 +19,14 @@ def HOTEL_BBL_POST_INSERT_GroupCancel(request):
     print(sql)
     block_id = d.get("block_id")
     psql = dbput("update business_block.business_block_definite set block_status_id = '5' where block_id = '"+block_id+"'")
+    cancelgrid = json.loads(dbget("select count(*) from business_block.grid where block_id= '"+block_id+"' \
+	                          union \
+	                          select count(*) from business_block.current_grid where block_id= '"+block_id+"' "))
+    print(cancelgrid)
+
+    if cancelgrid[0]['count'] > 0:
+        deltequery = dbput("delete from business_block.grid where block_id = '"+block_id+"' ; \
+                            delete from business_block.current_grid where block_id = '"+block_id+"'")
     RES_Log_Time = datetime.datetime.utcnow()+datetime.timedelta(hours=5, minutes=30)
     RES_Log_Time = RES_Log_Time.time().strftime("%H:%M:%S")
     RES_Log_Date = datetime.datetime.utcnow().date()

@@ -440,6 +440,7 @@ from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_cancel_DepositRuleReservation
 from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_Select_BlockFollowupDecisiondate
 from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_Select_Blockcutoffdatecutoffdays
 from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_Select_DepositDueDate
+from HOTEL_PMS_SELECT_MergeModule import Hotel_PMS_Select_Roominglistdue_date
 from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
@@ -1748,6 +1749,10 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays_all():
 @app.route("/Hotel_PMS_Select_DepositDueDate",methods=['POST'])
 def Hotel_PMS_Select_DepositDueDate_all():
    return Hotel_PMS_Select_DepositDueDate(request)
+
+@app.route("/Hotel_PMS_Select_Roominglistdue_date",methods=['POST'])
+def Hotel_PMS_Select_Roominglistdue_date_ALL():
+   return Hotel_PMS_Select_Roominglistdue_date(request)
 
 if __name__ == "__main__":
     #app.run(debug=True)

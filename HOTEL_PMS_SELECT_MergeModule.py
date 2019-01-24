@@ -90,7 +90,7 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays(request):
     datelist = []
     d = request.json
     businessdate = datetime.datetime.strptime(date[0]['roll_business_date'], '%Y-%m-%d').date()
-    sql =json.loads(dbget("   select block_room.cutoff_days,block_room.cutoff_date,business_block_definite.block_created_date \
+    sql =json.loads(dbget("select block_room.cutoff_days,block_room.cutoff_date,business_block_definite.block_created_date \
                            from business_block.business_block_definite, business_block.block_room \
                            where business_block_definite.block_id = '"+str(d['block_id'])+"' and block_room.block_id='"+str(d['block_id'])+"'"))
     print(sql)
@@ -98,11 +98,18 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays(request):
     date1 = initial + datetime.timedelta(days=1)
     date2 = date1 + datetime.timedelta(days=sql[0]['cutoff_days'])
     delta = date2-date1
+    print(delta)
+    end_date = initial + datetime.timedelta(days=delta.days+1)
+    print("end_date",end_date)
     if sql[0]['cutoff_date'] is not None:
         dateform = datetime.datetime.strptime(sql[0]['cutoff_date'], '%Y-%m-%d').date()
         print(sql[0]['cutoff_date'])
+        date3 = dateform + datetime.timedelta(days=1)
         if dateform == businessdate:
          return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record Valid','ReturnCode':'RV'}, sort_keys=True, indent=4))
+        elif date3 == businessdate:
+            return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+
             
     else:
         pass
@@ -111,16 +118,17 @@ def Hotel_PMS_Select_Blockcutoffdatecutoffdays(request):
       
         for i in range(delta.days + 1):
         #print(i)
-            print(date1 + datetime.timedelta(i))
+            print("checkinf for loop",date1 + datetime.timedelta(i))
         
             if date1 + datetime.timedelta(i) == businessdate:
                 return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record Valid','ReturnCode':'RV'}, sort_keys=True, indent=4))
-        
-           
+            elif end_date == businessdate:
+              return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+      
     else:
         pass
     
-    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'No Record','ReturnCode':'NOR'}, sort_keys=True, indent=4))
 
 
 def Hotel_PMS_Select_DepositDueDate(request):
@@ -129,12 +137,36 @@ def Hotel_PMS_Select_DepositDueDate(request):
                            where res_id = '"+str(d['res_id'])+"' and res_block is null or res_block = '' "))
     print(sql)
     businessdate = datetime.datetime.strptime(date[0]['roll_business_date'], '%Y-%m-%d').date()
+    
     for i in sql:
         if i['res_due_date'] is not None:
             dateform = datetime.datetime.strptime(i['res_due_date'], '%Y-%m-%d').date()
             print(dateform)
+            date2 = dateform + datetime.timedelta(days=1)
             if dateform == businessdate:
                 return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record Valid','ReturnCode':'RV'}, sort_keys=True, indent=4))
+            elif date2 == businessdate:
+                return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+           
         else:
              pass
-    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'No Record','ReturnCode':'NOR'}, sort_keys=True, indent=4))
+def Hotel_PMS_Select_Roominglistdue_date(request):
+    d = request.json
+    sql = json.loads(dbget("select rooming_list_duedate from business_block.block_business_details \
+                            where block_business_details.block_id = '"+str(d['block_id'])+"'"))
+    businessdate = datetime.datetime.strptime(date[0]['roll_business_date'], '%Y-%m-%d').date()
+    if sql[0]['rooming_list_duedate'] is not None:
+        dateform = datetime.datetime.strptime(sql[0]['rooming_list_duedate'], '%Y-%m-%d').date()
+        print(sql[0]['rooming_list_duedate'])
+        date2 = dateform + datetime.timedelta(days=1)
+        if dateform == businessdate:
+         return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record Valid','ReturnCode':'RV'}, sort_keys=True, indent=4))
+        elif date2 == businessdate:
+                return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'Record InValid','ReturnCode':'RIV'}, sort_keys=True, indent=4))
+           
+            
+    else:
+        pass
+    return(json.dumps({'Status': 'Success', 'StatusCode': '200','Return': 'No Record','ReturnCode':'NOR'}, sort_keys=True, indent=4))
+
